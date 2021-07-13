@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest mLocationRequest;
 
     private LatLng mOrigin;
-    private LatLng mDestination;
+    private LatLng mDest;
+    private Marker mDestMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,16 +95,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                 @Override
                 public void onMapLongClick(@NonNull LatLng latLng) {
-                    removePointFromMap(mDestination);
-                    mDestination = latLng;
+                    if (mDestMarker != null) {
+                        mDestMarker.remove();
+                    }
                     addPointToMap(latLng);
                 }
             });
         }
-    }
-
-    private void removePointFromMap(LatLng mDestination) {
-
     }
 
     // Trigger new location updates at interval
@@ -192,6 +190,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .icon(customMarker));
+        mDestMarker = marker;
+        mDest = latLng;
 
         // Use the bounce interpolator
         final android.view.animation.Interpolator interpolator =
