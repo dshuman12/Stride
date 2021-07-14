@@ -44,4 +44,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
     implementation "com.google.android.gms:play-services-maps:$googlePlayVersion"
     implementation "com.google.android.gms:play-services-location:$googlePlayVersion"
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.18.5"
 }
