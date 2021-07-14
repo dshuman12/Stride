@@ -30,13 +30,13 @@ The app will begin with New York City
 
 **Required Must-have Stories**
 
-[x] User can see a map (Google Maps API)
-[ ] User can see their location on the map
-[ ] User can see a map of their nearby area (Google Maps API)
-[ ] User can search locations in map (Google Maps API)
-[ ] User is routed to that location by walking
-[ ] User is routed via an optimized algorithm that includes City services (transit, bikes)
-[ ] User is notified of sidewalk condition / bus conditions
+- [x] User can see a map (Google Maps API)
+- [x] User can see their location on the map
+- [x] User can see a map of their nearby area (Google Maps API)
+- [ ] User can search locations in map (Google Maps API)
+- [ ] User is routed to that location by walking
+- [ ] User is routed via an optimized algorithm that includes City services (transit, bikes)
+- [ ] User is notified of sidewalk condition / bus conditions
 
 **Optional Nice-to-have Stories**
 
