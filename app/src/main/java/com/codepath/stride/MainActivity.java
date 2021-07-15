@@ -17,9 +17,13 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.BounceInterpolator;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -41,6 +45,13 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.parse.Parse;
 import com.parse.ParseUser;
+import com.codepath.stride.PlacesClient;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import okhttp3.Headers;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
@@ -50,9 +61,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int REQUEST_FINE_LOCATION = 34;
     private long UPDATE_INTERVAL = 10 * 1000;
     private long FASTEST_INTERVAL = 2000;
+    private static final String TAG = "MainActivity";
 
     private GoogleMap mMap;
     private LocationRequest mLocationRequest;
+    private EditText mSearchQuery;
+    private Button mBtnSearch;
 
     private LatLng mOrigin;
     private LatLng mDest;
@@ -73,6 +87,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
         //TODO: Change origin to the location when the routing is selected, not current location.
         startLocationUpdates();
+
+        mSearchQuery = findViewById(R.id.etPlaceSearch);
+        mBtnSearch = findViewById(R.id.btnSearch);
+        mBtnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClick signup button");
+                String searchQuery = mSearchQuery.getText().toString();
+                searchDestination(searchQuery);
+                // Clear search query to indicate that a search has sent
+                mSearchQuery.getText().clear();
+            }
+        });
     }
 
     private boolean checkPermissions() {
@@ -112,6 +139,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
         }
+    }
+
+    public void searchDestination(String query) {
+        JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                Log.d(TAG, "onSuccess");
+                JSONObject jsonObject = json.jsonObject;
+                try {
+                    Log.d(TAG, jsonObject.toString());
+                    JSONArray results = jsonObject.getJSONArray("candidates");
+                    if (results.length() > 0) {
+                        JSONObject top_candidate = (JSONObject) results.getJSONObject(0).get("geometry");
+                        JSONObject location = (JSONObject) top_candidate.get("location");
+                        Double latitude = (Double) location.get("lat");
+                        Double longitude = (Double) location.get("lng");
+                        addPointToMap(new LatLng(latitude, longitude));
+                    }
+
+                } catch (JSONException e) {
+                    Log.e(TAG, "Hit json exception", e);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                Log.d(TAG, "onFailure");
+            }
+        };
+        PlacesClient.getTopCandidateFromQuery(query, handler);
     }
 
     // Trigger new location updates at interval
@@ -202,6 +259,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .icon(customMarker));
         mDestMarker = marker;
         mDest = latLng;
+
+        // Display the found location to the User by navigating to pin location
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+        mMap.animateCamera(cameraUpdate);
 
         // Use the bounce interpolator
         final android.view.animation.Interpolator interpolator =

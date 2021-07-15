@@ -22,4 +22,39 @@
         android:layout_below="@id/toolbar"
         tools:layout="@layout/activity_main" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentBottom="false"
+            tools:layout_editor_absoluteX="5dp">
+
+            <EditText
+                android:id="@+id/etPlaceSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="@string/placesearch"
+                android:inputType="text"
+                app:hintEnabled="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="@string/search"
+            tools:layout_editor_absoluteX="5dp" />
+    </LinearLayout>
+
 </RelativeLayout>
