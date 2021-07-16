@@ -3,6 +3,7 @@ package com.codepath.stride;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.solver.widgets.analyzer.Direct;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -41,6 +42,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.parse.Parse;
@@ -155,7 +157,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         JSONObject location = (JSONObject) top_candidate.get("location");
                         Double latitude = (Double) location.get("lat");
                         Double longitude = (Double) location.get("lng");
-                        addPointToMap(new LatLng(latitude, longitude));
+                        LatLng destination = new LatLng(latitude, longitude);
+                        addPointToMap(destination);
+                        //Add route
+                        addRouteToPoint();
                     }
 
                 } catch (JSONException e) {
@@ -169,6 +174,44 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
         PlacesClient.getTopCandidateFromQuery(query, handler);
+    }
+
+    private void addRouteToPoint() {
+        JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                Log.d(TAG, "onSuccess");
+                JSONObject jsonObject = json.jsonObject;
+                Log.i(TAG, "Routes" + jsonObject.toString());
+                try {
+                    JSONArray routes = jsonObject.getJSONArray("routes");
+                    Log.i(TAG, "Routes" + routes.toString());
+                    if (routes.length() > 0) {
+                        JSONArray legs = routes.getJSONObject(0).getJSONArray("legs");
+                        if (legs.length() > 0) {
+                            JSONArray steps = legs.getJSONObject(0).getJSONArray("steps");
+                            if (steps.length() > 0) {
+                                // Get the display route JSON response
+                                PolylineOptions options = DirectionsClient.createDisplayRoute(steps);
+                                // Add display route to the map
+                                mMap.addPolyline(options);
+                            }
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "Found error with accessing routes");
+                    return;
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                Log.d(TAG, "onFailure");
+            }
+        };
+
+        DirectionsClient.getRouteFromLocations(mOrigin, mDest, handler);
     }
 
     // Trigger new location updates at interval
@@ -215,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (latLng != null) {
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
             mMap.animateCamera(cameraUpdate);
+            mOrigin = latLng;
         } else {
             Toast.makeText(this, "Current location was null, please input your location in the settings page", Toast.LENGTH_SHORT).show();
         }
