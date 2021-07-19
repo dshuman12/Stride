@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,6 +53,8 @@ import com.codepath.stride.PlacesClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Map;
 
 import okhttp3.Headers;
 
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng mOrigin;
     private LatLng mDest;
     private Marker mDestMarker;
+    private Polyline mRoute;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 // Get the display route JSON response
                                 PolylineOptions options = DirectionsClient.createDisplayRoute(steps);
                                 // Add display route to the map
-                                mMap.addPolyline(options);
+                                mRoute = mMap.addPolyline(options);
                             }
                         }
                     }
@@ -210,6 +214,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.d(TAG, "onFailure");
             }
         };
+
+        if (mRoute != null) {
+            mRoute.remove();
+        }
 
         DirectionsClient.getRouteFromLocations(mOrigin, mDest, handler);
     }
@@ -241,7 +249,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 // do work here
-                onLocationChanged(locationResult.getLastLocation());
+                Location lastLocation = locationResult.getLastLocation();
+                onLocationChanged(lastLocation);
+
+                // If there is no destination to focus on, zoom in on current location
+                if (mDest == null) {
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
+                            17);
+                    mMap.animateCamera(cameraUpdate);
+                }
+
             }
         },
         Looper.myLooper());
@@ -256,8 +274,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         // Display Location
         if (latLng != null) {
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            mMap.animateCamera(cameraUpdate);
+            //CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+            //mMap.animateCamera(cameraUpdate);
             mOrigin = latLng;
         } else {
             Toast.makeText(this, "Current location was null, please input your location in the settings page", Toast.LENGTH_SHORT).show();
