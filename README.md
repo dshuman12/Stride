@@ -89,8 +89,7 @@ The app will begin with New York City
     * Back to Home
 
 ## Wireframes
-[Add picture of your hand sketched wireframes in this section]
-<img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+https://www.figma.com/file/hTrxb0MfeKEfkLs8OjGbI3/Stride?node-id=0%3A1
 
 ## Schema 
 | Name  | Type  | Description            |
