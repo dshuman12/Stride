@@ -92,15 +92,28 @@ The app will begin with New York City
 [Add picture of your hand sketched wireframes in this section]
 <img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
 
-### [BONUS] Digital Wireframes & Mockups
-
-### [BONUS] Interactive Prototype
-
 ## Schema 
-[This section will be completed in Unit 9]
-### Models
-[Add table of models]
+| Name  | Type  | Description            |
+|-------|-------|------------------------|
+| username |   String | Unique id per user |
+| password |   String | Passord for User login |
+| favorites   |  Array  |  An array of favorited locations (lat, lon)s |
+| gender |  Array  | Gender identity |
+| context   |  String  | Preferred context setting |
+| requiresRamp |  Boolean  | Illustrates whether the user requires better sidewalk conditions |
+| hasBike | Boolean | Has access to a bike |
+| hasMotor | Boolean | Has access to a motor vehicle |
+| preferredWalking | Int | Preferred walking distance |
+| preferredMode | String | Preferred mode of transport |
+
 ### Networking
-- [Add list of network requests by screen ]
-- [Create basic snippets for each Parse network request]
-- [OPTIONAL: List endpoints if using existing API such as Yelp]
+* Login Screen: 
+   * (Read/GET) Query Parse Users
+   * (Create/POST) Add a new Parse User
+* Main Screen: 
+   * (Read/GET) Query Google Maps SDK to display map
+   * (Read/GET) Query Places API to search locations
+   * (Read/GET) Query Directions API to create a route to set location. 
+* Profile Screen
+   * (Read/GET) Query Parse User to get the current user information
+   * (Update/PUT) Update an existing user to change app preferences
