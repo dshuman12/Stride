@@ -1,62 +1,26 @@
 package com.codepath.stride;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.solver.widgets.analyzer.Direct;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.app.Application;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.BounceInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.TextView;
 
-import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.parse.Parse;
+import com.hardsoftstudio.widget.AnchorSheetBehavior;
 import com.parse.ParseUser;
-import com.codepath.stride.PlacesClient;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Map;
-
-import okhttp3.Headers;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
@@ -70,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
 
     private MapManager mMapManager;
 
+    private AnchorSheetBehavior<View> anchorBehavior;
+    private TextView mName;
+    private TextView mAddress;
+    private TextView mRouteTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,10 +48,17 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(" ");
+        }
+
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
-        mMapManager = new MapManager(this, mapFragment);
+        mMapManager = new MapManager(this, this, mapFragment);
 
         //TODO: Change origin to the location when the routing is selected, not current location.
         mMapManager.startLocationUpdates();
@@ -99,6 +75,65 @@ public class MainActivity extends AppCompatActivity {
                 mSearchQuery.getText().clear();
             }
         });
+
+        mName = findViewById(R.id.bottom_sheet_title);
+        mAddress = findViewById(R.id.address);
+        mRouteTime = findViewById(R.id.route_time);
+
+        anchorBehavior = AnchorSheetBehavior.from(findViewById(R.id.anchor_panel));
+        anchorBehavior.setHideable(true);
+        anchorBehavior.setState(AnchorSheetBehavior.STATE_HIDDEN);
+        anchorBehavior.setAnchorSheetCallback(new AnchorSheetBehavior.AnchorSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, @AnchorSheetBehavior.State int newState) {
+                JSONObject route = mMapManager.getmRouteInfo();
+                JSONObject dest = mMapManager.getmDestInfo();
+
+                try {
+                    mName.setText(dest.getString("name"));
+                    mAddress.setText(dest.getString("formatted_address"));
+                    mRouteTime.setText(mMapManager.getWalkScore().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        int state = anchorBehavior.getState();
+        if (state == AnchorSheetBehavior.STATE_COLLAPSED || state == AnchorSheetBehavior.STATE_HIDDEN) {
+            super.onBackPressed();
+        } else {
+            anchorBehavior.setState(AnchorSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
+    public void openRouteInfo() {
+        switch (anchorBehavior.getState()) {
+            case AnchorSheetBehavior.STATE_ANCHOR:
+                anchorBehavior.setState(AnchorSheetBehavior.STATE_EXPANDED);
+                Log.i(TAG, "EXPANDED");
+                break;
+            case AnchorSheetBehavior.STATE_COLLAPSED:
+                anchorBehavior.setState(AnchorSheetBehavior.STATE_ANCHOR);
+                Log.i(TAG, "COLLAPSED");
+                break;
+            case AnchorSheetBehavior.STATE_HIDDEN:
+                anchorBehavior.setState(AnchorSheetBehavior.STATE_COLLAPSED);
+                break;
+            case AnchorSheetBehavior.STATE_EXPANDED:
+                anchorBehavior.setState(AnchorSheetBehavior.STATE_ANCHOR);
+                break;
+            default:
+                break;
+        }
     }
 
     // Trigger new location updates at interval

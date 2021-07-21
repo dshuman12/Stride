@@ -5,4 +5,6 @@
     <string name="login">Login</string>
     <string name="placesearch">Find a place...</string>
     <string name="search">Search</string>
+    <string name="slide_me_up">Slide</string>
+    <string name="slide_me_down">down</string>
 </resources>

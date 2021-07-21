@@ -46,4 +46,6 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:$googlePlayVersion"
     implementation "com.github.parse-community.Parse-SDK-Android:parse:1.18.5"
     implementation 'com.codepath.libraries:asynchttpclient:2.1.1'
+    implementation 'com.mahc.custombottomsheetbehavior:googlemaps-like:0.9.1'
+    implementation 'com.github.skimarxall:AnchorSheetBehavior:master-SNAPSHOT'
 }

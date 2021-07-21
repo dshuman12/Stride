@@ -42,9 +42,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import okhttp3.Headers;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
@@ -62,13 +59,21 @@ public class MapManager implements OnMapReadyCallback {
 
     private LatLng mOrigin;
     private LatLng mDest;
+    private JSONObject mDestInfo;
     private Marker mDestMarker;
     private Polyline mRoute;
+    private JSONObject mRouteInfo;
 
     private Activity mActivity;
+    private Context mContext;
+    private Double mAvgWalkability;
+    private Integer mCountWalkability;
 
-    public MapManager(Activity activity, SupportMapFragment mapFragment) {
+    public MapManager(Activity activity, Context context, SupportMapFragment mapFragment) {
         mActivity = activity;
+        mContext = context;
+        mAvgWalkability = 0.0;
+        mCountWalkability = 0;
 
         mapFragment.getMapAsync(this);
     }
@@ -78,9 +83,9 @@ public class MapManager implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         if (checkPermissions()) {
             // If the location permissions were not granted...
-            if (ActivityCompat.checkSelfPermission(mActivity.getApplicationContext(),
+            if (ActivityCompat.checkSelfPermission(mContext,
                     Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(mActivity.getApplicationContext(),
+                    && ActivityCompat.checkSelfPermission(mContext,
                     Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -103,20 +108,19 @@ public class MapManager implements OnMapReadyCallback {
         JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
-                Log.d(TAG, "onSuccess");
                 JSONObject jsonObject = json.jsonObject;
                 try {
-                    Log.d(TAG, jsonObject.toString());
                     JSONArray results = jsonObject.getJSONArray("candidates");
                     if (results.length() > 0) {
-                        JSONObject top_candidate = (JSONObject) results.getJSONObject(0).get("geometry");
+                        mDestInfo = results.getJSONObject(0);
+                        JSONObject top_candidate = (JSONObject) mDestInfo.get("geometry");
                         JSONObject location = (JSONObject) top_candidate.get("location");
                         Double latitude = (Double) location.get("lat");
                         Double longitude = (Double) location.get("lng");
                         LatLng destination = new LatLng(latitude, longitude);
                         addPointToMap(destination);
                         //Add route
-                        addRouteToPoint();
+                        addRouteToMap();
                     }
 
                 } catch (JSONException e) {
@@ -141,8 +145,6 @@ public class MapManager implements OnMapReadyCallback {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         // Display Location
         if (latLng != null) {
-            //CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            //mMap.animateCamera(cameraUpdate);
             mOrigin = latLng;
         } else {
             Toast.makeText(mActivity, "Current location was null, please input your location in the settings page", Toast.LENGTH_SHORT).show();
@@ -153,7 +155,7 @@ public class MapManager implements OnMapReadyCallback {
         // Get last known recent location using new Google Play Services SDK (v11+)
         FusedLocationProviderClient locationClient = getFusedLocationProviderClient(mActivity);
 
-        if (ActivityCompat.checkSelfPermission(mActivity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mActivity.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         locationClient.getLastLocation()
@@ -194,7 +196,7 @@ public class MapManager implements OnMapReadyCallback {
         settingsClient.checkLocationSettings(locationSettingsRequest);
 
         // new Google API SDK v11 uses getFusedLocationProviderClient(this)
-        if (ActivityCompat.checkSelfPermission(mActivity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mActivity.getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         getFusedLocationProviderClient(mActivity).requestLocationUpdates(mLocationRequest, new LocationCallback() {
@@ -218,7 +220,7 @@ public class MapManager implements OnMapReadyCallback {
     }
 
     private boolean checkPermissions() {
-        if (ContextCompat.checkSelfPermission(mActivity.getApplicationContext(),
+        if (ContextCompat.checkSelfPermission(mContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             return true;
         } else {
@@ -277,19 +279,17 @@ public class MapManager implements OnMapReadyCallback {
         });
     }
 
-    private void addRouteToPoint() {
+    private void addRouteToMap() {
         JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
-                Log.d(TAG, "onSuccess");
                 JSONObject jsonObject = json.jsonObject;
-                Log.i(TAG, "Routes" + jsonObject.toString());
 
                 try {
                     JSONArray routes = jsonObject.getJSONArray("routes");
-                    Log.i(TAG, "Routes" + routes.toString());
                     if (routes.length() > 0) {
-                        JSONArray legs = routes.getJSONObject(0).getJSONArray("legs");
+                        mRouteInfo = routes.getJSONObject(0);
+                        JSONArray legs = mRouteInfo.getJSONArray("legs");
                         if (legs.length() > 0) {
                             JSONArray steps = legs.getJSONObject(0).getJSONArray("steps");
                             if (steps.length() > 0) {
@@ -297,6 +297,10 @@ public class MapManager implements OnMapReadyCallback {
                                 PolylineOptions options = DirectionsClient.createDisplayRoute(steps);
                                 // Add display route to the map
                                 mRoute = mMap.addPolyline(options);
+                                getSidewalkContext(steps);
+
+                                // Opens bottom drawer with route info
+                                ((MainActivity)mContext).openRouteInfo();
                             }
                         }
                     }
@@ -320,5 +324,51 @@ public class MapManager implements OnMapReadyCallback {
         DirectionsClient.getRouteFromLocations(mOrigin, mDest, handler);
     }
 
-    // TODO: pull out checkself permission
+    public void getSidewalkContext(JSONArray route) {
+        JsonHttpResponseHandler handler = new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                JSONObject jsonObject = json.jsonObject;
+                try {
+                    Integer score = (Integer) jsonObject.get("walkscore");
+                    mAvgWalkability += score.doubleValue();
+                    mCountWalkability += 1;
+                } catch (JSONException e) {
+                    Log.e(TAG, "Hit json exception", e);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                Log.d(TAG, "onFailure");
+            }
+        };
+
+        // Loop through conditions
+        for(int i = 0; i < route.length(); i++) {
+            try {
+                JSONObject step = (JSONObject) route.get(i);
+                JSONObject startLoc = (JSONObject) step.get("start_location");
+                String query = "lat=" + startLoc.get("lat") + "&lon=" + startLoc.get("lng");
+
+                SidewalkConditionsClient.getWalkabilityScore(query, handler);
+            }
+            catch (JSONException e) {
+                Log.d(TAG, "Issue accessing step from JSON response");
+            }
+        }
+    }
+
+    public JSONObject getmRouteInfo() {
+        return mRouteInfo;
+    }
+
+    public JSONObject getmDestInfo() {
+        return mDestInfo;
+    }
+
+    public Double getWalkScore() {
+        return mAvgWalkability / mCountWalkability;
+    }
+
 }

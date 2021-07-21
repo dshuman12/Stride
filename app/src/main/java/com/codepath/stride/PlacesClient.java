@@ -14,7 +14,7 @@ import okhttp3.Headers;
 
 public class PlacesClient {
 
-    public static final String PLACES_CANDIDATES = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=geometry&key=%s";
+    public static final String PLACES_CANDIDATES = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=%s&inputtype=textquery&fields=photos,formatted_address,name,geometry&key=%s";
     public static final String TAG = "PlacesClient";
 
     public static void getTopCandidateFromQuery(String query, JsonHttpResponseHandler handler) {
