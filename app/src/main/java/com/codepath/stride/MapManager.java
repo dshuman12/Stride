@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.animation.BounceInterpolator;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ import org.json.JSONObject;
 import okhttp3.Headers;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
+import com.bumptech.glide.Glide;
 
 // Encapsulate all map related initialization
 public class MapManager implements OnMapReadyCallback {
@@ -109,6 +111,7 @@ public class MapManager implements OnMapReadyCallback {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 JSONObject jsonObject = json.jsonObject;
+                Log.i(TAG, "search destination: " + jsonObject.toString());
                 try {
                     JSONArray results = jsonObject.getJSONArray("candidates");
                     if (results.length() > 0) {
@@ -344,7 +347,6 @@ public class MapManager implements OnMapReadyCallback {
             }
         };
 
-        // Loop through conditions
         for(int i = 0; i < route.length(); i++) {
             try {
                 JSONObject step = (JSONObject) route.get(i);
@@ -369,6 +371,27 @@ public class MapManager implements OnMapReadyCallback {
 
     public Double getWalkScore() {
         return mAvgWalkability / mCountWalkability;
+    }
+
+    public void getPhoto(ImageView im) {
+        String photoReference = null;
+        try {
+            JSONObject photo = (JSONObject) mDestInfo.getJSONArray("photos").getJSONObject(0);
+            photoReference = photo.getString("photo_reference");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (photoReference == null) {
+            // There was an issue in grabbing the photo reference from the json response
+            Log.i(TAG, "onFailure: Issue grabbing photo reference from Place response");
+            return;
+        }
+        String imageUrl = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference="
+                + photoReference +"&key=" + BuildConfig.MAPS_API_KEY;
+        Glide.with(mActivity)
+                .load(imageUrl)
+                .centerCrop()
+                .into(im);
     }
 
 }

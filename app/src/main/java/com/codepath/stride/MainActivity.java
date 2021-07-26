@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.SupportMapFragment;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mName;
     private TextView mAddress;
     private TextView mRouteTime;
+
+    private ImageView mImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         mName = findViewById(R.id.bottom_sheet_title);
         mAddress = findViewById(R.id.address);
         mRouteTime = findViewById(R.id.route_time);
+        mImage = findViewById(R.id.image);
 
         anchorBehavior = AnchorSheetBehavior.from(findViewById(R.id.anchor_panel));
         anchorBehavior.setHideable(true);
@@ -92,7 +96,12 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     mName.setText(dest.getString("name"));
                     mAddress.setText(dest.getString("formatted_address"));
-                    mRouteTime.setText(mMapManager.getWalkScore().toString());
+                    Double walkScore = mMapManager.getWalkScore();
+                    mRouteTime.setText(walkScore.toString());
+                    if (mImage.getDrawable() == null) {
+                        mMapManager.getPhoto(mImage);
+                    }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
