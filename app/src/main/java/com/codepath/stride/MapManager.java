@@ -8,8 +8,10 @@ import android.location.Location;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -98,7 +100,7 @@ public class MapManager implements OnMapReadyCallback {
                 @Override
                 public void onMapLongClick(@NonNull LatLng latLng) {
                     if (mDestMarker != null) {
-                        mDestMarker.remove();
+                        resetDestination();
                     }
                     addPointToMap(latLng);
                 }
@@ -369,8 +371,14 @@ public class MapManager implements OnMapReadyCallback {
         return mDestInfo;
     }
 
-    public Double getWalkScore() {
-        return mAvgWalkability / mCountWalkability;
+    public Integer getWalkScore(TextView mWalkScoreView) {
+        if (mCountWalkability == 0) {
+            mWalkScoreView.setVisibility(View.INVISIBLE);
+            return 0;
+        }
+        mWalkScoreView.setVisibility(View.VISIBLE);
+        double walkscore = mAvgWalkability / mCountWalkability;
+        return (int) walkscore;
     }
 
     public void getPhoto(ImageView im) {
@@ -392,6 +400,17 @@ public class MapManager implements OnMapReadyCallback {
                 .load(imageUrl)
                 .centerCrop()
                 .into(im);
+    }
+
+    public void resetDestination() {
+        mDestInfo = new JSONObject();
+        mRouteInfo = new JSONObject();
+        mDest = null;
+        mAvgWalkability = 0.0;
+        mCountWalkability = 0;
+
+        mDestMarker.remove();
+        mRoute.remove();
     }
 
 }

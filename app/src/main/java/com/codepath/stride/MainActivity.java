@@ -90,20 +90,13 @@ public class MainActivity extends AppCompatActivity {
         anchorBehavior.setAnchorSheetCallback(new AnchorSheetBehavior.AnchorSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, @AnchorSheetBehavior.State int newState) {
-                JSONObject route = mMapManager.getmRouteInfo();
-                JSONObject dest = mMapManager.getmDestInfo();
-
-                try {
-                    mName.setText(dest.getString("name"));
-                    mAddress.setText(dest.getString("formatted_address"));
-                    Double walkScore = mMapManager.getWalkScore();
-                    mRouteTime.setText(walkScore.toString());
-                    if (mImage.getDrawable() == null) {
-                        mMapManager.getPhoto(mImage);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if (newState == AnchorSheetBehavior.STATE_HIDDEN) {
+                    // If the bottom navigation bar is slid down, reset all values.
+                    mMapManager.resetDestination();
+                    mImage.setImageResource(0);
+                    mName.setText("");
+                    mAddress.setText("");
+                    mRouteTime.setText("");
                 }
             }
 
@@ -114,34 +107,23 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        int state = anchorBehavior.getState();
-        if (state == AnchorSheetBehavior.STATE_COLLAPSED || state == AnchorSheetBehavior.STATE_HIDDEN) {
-            super.onBackPressed();
-        } else {
-            anchorBehavior.setState(AnchorSheetBehavior.STATE_COLLAPSED);
-        }
-    }
-
     public void openRouteInfo() {
-        switch (anchorBehavior.getState()) {
-            case AnchorSheetBehavior.STATE_ANCHOR:
-                anchorBehavior.setState(AnchorSheetBehavior.STATE_EXPANDED);
-                Log.i(TAG, "EXPANDED");
-                break;
-            case AnchorSheetBehavior.STATE_COLLAPSED:
-                anchorBehavior.setState(AnchorSheetBehavior.STATE_ANCHOR);
-                Log.i(TAG, "COLLAPSED");
-                break;
-            case AnchorSheetBehavior.STATE_HIDDEN:
-                anchorBehavior.setState(AnchorSheetBehavior.STATE_COLLAPSED);
-                break;
-            case AnchorSheetBehavior.STATE_EXPANDED:
-                anchorBehavior.setState(AnchorSheetBehavior.STATE_ANCHOR);
-                break;
-            default:
-                break;
+        anchorBehavior.setState(AnchorSheetBehavior.STATE_COLLAPSED);
+
+        JSONObject route = mMapManager.getmRouteInfo();
+        JSONObject dest = mMapManager.getmDestInfo();
+
+        try {
+            mName.setText(dest.getString("name"));
+            mAddress.setText(dest.getString("formatted_address"));
+            Integer walkScore = mMapManager.getWalkScore(mRouteTime);
+            mRouteTime.setText(walkScore.toString());
+            if (mImage.getDrawable() == null) {
+                mMapManager.getPhoto(mImage);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
