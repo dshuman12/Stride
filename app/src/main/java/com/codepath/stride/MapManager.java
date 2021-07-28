@@ -50,6 +50,8 @@ import okhttp3.Headers;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
+
 // Encapsulate all map related initialization
 public class MapManager implements OnMapReadyCallback {
 
@@ -303,9 +305,6 @@ public class MapManager implements OnMapReadyCallback {
                                 // Add display route to the map
                                 mRoute = mMap.addPolyline(options);
                                 getSidewalkContext(steps);
-
-                                // Opens bottom drawer with route info
-                                ((MainActivity)mContext).openRouteInfo();
                             }
                         }
                     }
@@ -338,8 +337,12 @@ public class MapManager implements OnMapReadyCallback {
                     Integer score = (Integer) jsonObject.get("walkscore");
                     mAvgWalkability += score.doubleValue();
                     mCountWalkability += 1;
+                    if (mCountWalkability >= route.length()) {
+                        ((MainActivity)mContext).openRouteInfo();
+                    }
                 } catch (JSONException e) {
                     Log.e(TAG, "Hit json exception", e);
+                    ((MainActivity)mContext).openRouteInfo();
                 }
             }
 
@@ -351,16 +354,62 @@ public class MapManager implements OnMapReadyCallback {
 
         for(int i = 0; i < route.length(); i++) {
             try {
+                //If distance between startloc and endloc is > 100 meters
+                // Get midpoint between two lat lons
                 JSONObject step = (JSONObject) route.get(i);
                 JSONObject startLoc = (JSONObject) step.get("start_location");
+                JSONObject endLoc = (JSONObject) step.get("end_location");
+                double stepDistance = distance((double) startLoc.get("lat"), (double) endLoc.get("lng"),
+                        (double) startLoc.get("lat"), (double) endLoc.get("lng"));
+                if (stepDistance >= 100.0) {
+                    LatLng midpoint = midPoint((double) startLoc.get("lat"), (double) endLoc.get("lng"),
+                            (double) startLoc.get("lat"), (double) endLoc.get("lng"));
+                    String midpointQuery = "lat=" + midpoint.latitude + "&lon=" + midpoint.longitude;
+                    SidewalkConditionsClient.getWalkabilityScore(midpointQuery, handler);
+                }
                 String query = "lat=" + startLoc.get("lat") + "&lon=" + startLoc.get("lng");
-
                 SidewalkConditionsClient.getWalkabilityScore(query, handler);
             }
             catch (JSONException e) {
                 Log.d(TAG, "Issue accessing step from JSON response");
             }
         }
+    }
+
+    public static LatLng midPoint(double lat1,double lon1,double lat2,double lon2){
+
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        //convert to radians
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+        lon1 = Math.toRadians(lon1);
+
+        double Bx = Math.cos(lat2) * Math.cos(dLon);
+        double By = Math.cos(lat2) * Math.sin(dLon);
+        double lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + Bx) * (Math.cos(lat1) + Bx) + By * By));
+        double lon3 = lon1 + Math.atan2(By, Math.cos(lat1) + Bx);
+
+        //print out in degrees
+        return new LatLng(lat3, lon3);
+    }
+
+    public static double distance(double lat1, double lat2, double lon1,
+                                  double lon2) {
+
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c * 1000; // convert to meters
+
+        distance = Math.pow(distance, 2);
+
+        return Math.sqrt(distance);
     }
 
     public JSONObject getmRouteInfo() {
