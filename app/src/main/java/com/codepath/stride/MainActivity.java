@@ -147,6 +147,12 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return true;
         }
+        if (item.getItemId() == R.id.imSettings) {
+            // Settings Icon is tapped, open preferences
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 }
