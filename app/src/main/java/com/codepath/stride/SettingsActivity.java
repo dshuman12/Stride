@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,7 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
     private ImageView mIvProfilePhoto;
     private Spinner mPrefMode;
     private ParseUser mUser;
+    private DataManager mDataManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,8 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
         mPrefMode = findViewById(R.id.prefMode);
         mPrefMode.setOnItemSelectedListener(this);
 
-        mUser = ParseUser.getCurrentUser();
+        mDataManager = new DataManager();
+        mUser = mDataManager.getUser();
         mTvUser.setText("@" + mUser.getString("username"));
         mTvName.setText(mUser.getString("name"));
 
@@ -60,24 +63,14 @@ public class SettingsActivity extends AppCompatActivity implements AdapterView.O
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         Log.i("SettingsActivity", "" + mUser.getInt("preferredMode"));
         mPrefMode.setAdapter(adapter);
-        mPrefMode.setSelection(mUser.getInt("preferredMode"));
+        mPrefMode.setSelection(mDataManager.getPreferredMode());
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         // Update User in Parse
         Log.i("SettingsActivity", "" + position + "" + id);
-        ParseUser user = ParseUser.getCurrentUser();
-        user.put("preferredMode", position);
-        user.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    Log.e("SettingsActivity", "Error while saving", e);
-                }
-                Log.i("SettingsActivity", "Post save was successful");
-            }
-        });
+        mDataManager.updatePreferredMode(position);
     }
 
     @Override

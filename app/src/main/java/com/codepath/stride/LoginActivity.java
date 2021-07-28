@@ -23,6 +23,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button mBtnLogin;
     private Button mBtnSignup;
 
+    private DataManager mDataManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +53,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        if (ParseUser.getCurrentUser() != null) {
+        mDataManager = new DataManager();
+
+        if (mDataManager.getUser() != null) {
             goMainActivity();
         }
     }
