@@ -28,9 +28,25 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:background="@drawable/layout_search"
+        android:padding="5dp"
+        android:layout_margin="10dp">
+
+        <ImageButton
+            android:id="@+id/btnSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/search"
+            android:background="#80FFFFFF"
+            android:alpha=".55"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="center"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputUsername"
@@ -38,27 +54,20 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="false"
             android:layout_alignParentBottom="false"
-            tools:layout_editor_absoluteX="5dp">
+            android:background="#80FFFFFF"
+            android:layout_gravity="center"
+            android:layout_marginRight="10dp">
 
             <EditText
                 android:id="@+id/etPlaceSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:hint="@string/placesearch"
                 android:inputType="text"
-                app:hintEnabled="true" />
+                app:hintEnabled="true"
+                android:background="#80FFFFFF"
+                android:layout_gravity="center"/>
         </com.google.android.material.textfield.TextInputLayout>
-
-        <Button
-            android:id="@+id/btnSearch"
-            android:layout_width="match_parent"
-            android:layout_height="65dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:text="@string/search"
-            tools:layout_editor_absoluteX="5dp" />
     </LinearLayout>
 
     <FrameLayout

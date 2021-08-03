@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private EditText mSearchQuery;
-    private Button mBtnSearch;
+    private ImageButton mBtnSearch;
 
     private MapManager mMapManager;
 
