@@ -43,7 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView mName;
     private TextView mAddress;
     private TextView mRouteTime;
+    private TextView mRouteDescription;
 
+    private TextView mRouteDescImage;
     private ImageView mImage;
 
     @Override
@@ -87,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
         mName = findViewById(R.id.bottom_sheet_title);
         mAddress = findViewById(R.id.address);
         mRouteTime = findViewById(R.id.route_time);
+        mRouteDescription = findViewById(R.id.route_description);
         mImage = findViewById(R.id.image);
+        mRouteDescImage = findViewById(R.id.route_description_image);
 
         anchorBehavior = AnchorSheetBehavior.from(findViewById(R.id.anchor_panel));
         anchorBehavior.setHideable(true);
@@ -103,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                     mAddress.setText("");
                     mRouteTime.setText("");
                     mRouteTime.setBackgroundColor(getResources().getColor(R.color.dark_grey));
+                    mRouteDescImage.setBackgroundColor(getResources().getColor(R.color.dark_grey));
                 }
             }
 
@@ -124,15 +129,25 @@ public class MainActivity extends AppCompatActivity {
             mAddress.setText(dest.getString("formatted_address"));
             Integer walkScore = mMapManager.getWalkScore(mRouteTime);
             mRouteTime.setText(walkScore.toString());
+            mRouteDescImage.setText(walkScore.toString());
             if (walkScore > 80) {
                 Log.i(TAG, "walkscore" + walkScore);
                 mRouteTime.getBackground().setTint(getResources().getColor(R.color.blue));
+                mRouteDescription.setText("This route is safe to walk");
+                mRouteDescImage.getBackground().setTint(getResources().getColor(R.color.blue));
+
             }
             else if (walkScore > 50) {
                 mRouteTime.getBackground().setTint(getResources().getColor(R.color.yellow));
+                mRouteDescImage.getBackground().setTint(getResources().getColor(R.color.yellow));
+                mRouteDescription.setText("This route is safe to walk. Please be advised that you may " +
+                        "have some difficulty over parts of this route.");
             }
             else {
                 mRouteTime.getBackground().setTint(getResources().getColor(R.color.orange));
+                mRouteDescImage.getBackground().setTint(getResources().getColor(R.color.orange));
+                mRouteDescription.setText("This route will be difficult to walk. " +
+                        "Please consider using other modes of transport.");
             }
 
             if (mImage.getDrawable() == null) {

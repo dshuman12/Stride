@@ -33,11 +33,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -302,6 +304,9 @@ public class MapManager implements OnMapReadyCallback {
                             if (steps.length() > 0) {
                                 // Get the display route JSON response
                                 PolylineOptions options = DirectionsClient.createDisplayRoute(steps);
+                                options.color(ContextCompat.getColor(mContext, R.color.dark_tan));
+                                options.endCap(new RoundCap());
+                                options.width(30);
                                 // Add display route to the map
                                 mRoute = mMap.addPolyline(options);
                                 getSidewalkContext(steps);
@@ -359,14 +364,15 @@ public class MapManager implements OnMapReadyCallback {
                 JSONObject step = (JSONObject) route.get(i);
                 JSONObject startLoc = (JSONObject) step.get("start_location");
                 JSONObject endLoc = (JSONObject) step.get("end_location");
-                double stepDistance = distance((double) startLoc.get("lat"), (double) endLoc.get("lng"),
+                /*double stepDistance = distance((double) startLoc.get("lat"), (double) endLoc.get("lng"),
                         (double) startLoc.get("lat"), (double) endLoc.get("lng"));
                 if (stepDistance >= 100.0) {
                     LatLng midpoint = midPoint((double) startLoc.get("lat"), (double) endLoc.get("lng"),
                             (double) startLoc.get("lat"), (double) endLoc.get("lng"));
                     String midpointQuery = "lat=" + midpoint.latitude + "&lon=" + midpoint.longitude;
                     SidewalkConditionsClient.getWalkabilityScore(midpointQuery, handler);
-                }
+                }*/
+
                 String query = "lat=" + startLoc.get("lat") + "&lon=" + startLoc.get("lng");
                 SidewalkConditionsClient.getWalkabilityScore(query, handler);
             }
@@ -374,6 +380,20 @@ public class MapManager implements OnMapReadyCallback {
                 Log.d(TAG, "Issue accessing step from JSON response");
             }
         }
+    }
+
+
+    public static ArrayList<LatLng> midpoints(double lat1, double lat2, double lon1,
+                                              double lon2, ArrayList<LatLng> built) {
+        double stepDistance = distance(lat1, lon1, lat2, lon2);
+        if (stepDistance >= 100.0) {
+            LatLng midpoint = midPoint(lat1, lon1,
+                    lat2, lon2);
+            midpoints(lat1, midpoint.latitude, lon1, midpoint.longitude, built);
+            midpoints(midpoint.latitude, lat2, midpoint.longitude, lon2, built);
+        }
+        built.add(new LatLng(lat1, lon1));
+        return built;
     }
 
     public static LatLng midPoint(double lat1,double lon1,double lat2,double lon2){
