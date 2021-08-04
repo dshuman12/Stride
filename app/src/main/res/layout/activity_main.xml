@@ -19,7 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:titleTextColor="@android:color/white"
-        android:background="?attr/colorPrimary">
+        android:background="?android:attr/colorPrimary"
+        android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar">
     </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
@@ -74,7 +75,7 @@
         android:id="@+id/anchor_panel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/dark_tan"
         app:layout_behavior="com.hardsoftstudio.widget.AnchorSheetBehavior"
         app:behavior_peekHeight="@dimen/bottom_sheet_peek_height">
 
@@ -89,7 +90,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/bottom_sheet_peek_height"
-                android:background="@color/colorPrimary"
+                android:background="@color/dark_tan"
                 android:paddingTop="8dp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"

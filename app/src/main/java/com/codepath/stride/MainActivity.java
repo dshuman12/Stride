@@ -54,8 +54,9 @@ public class MainActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(" ");
+            actionBar.setLogo(getResources().getDrawable(R.drawable.logo_white));
+            actionBar.setTitle("");
+            //actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.logo_white));
         }
 
 
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 String searchQuery = mSearchQuery.getText().toString();
                 mMapManager.searchDestination(searchQuery);
                 // Clear search query to indicate that a search has sent
+                mSearchQuery.getText().clear();
                 mSearchQuery.getText().clear();
             }
         });

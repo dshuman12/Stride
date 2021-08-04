@@ -4,11 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/logo_black"
+        android:layout_margin="40dp"/>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp">
+        android:layout_margin="5dp"
+        android:layout_below="@id/logo">
 
         <EditText
             android:id="@+id/etUsername"
