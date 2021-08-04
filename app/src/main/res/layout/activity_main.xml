@@ -96,6 +96,21 @@
                 android:paddingEnd="16dp"
                 android:paddingBottom="8dp">
 
+                <TextView
+                    android:id="@+id/route_time"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/walkscore"
+                    android:backgroundTint="@color/dark_grey"
+                    android:text=""
+                    android:textColor="@android:color/white"
+                    android:textAlignment="center"
+                    android:textSize="30dp"
+                    android:textStyle="bold"
+
+                    android:padding="2dp"/>
+
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -119,17 +134,6 @@
                         android:layout_marginTop="5dp"/>
 
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/route_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:textColor="@android:color/white"
-                    android:textSize="14sp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:paddingTop="8dp"/>
 
             </RelativeLayout>
             <ImageView

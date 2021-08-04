@@ -7,4 +7,8 @@
     <color name="orange">#FFD0610E</color>
     <color name="tan">#FFE2D6BC</color>
     <color name="dark_tan">#FFADA292</color>
+    <color name="light_grey">#FF94A2AB</color>
+    <color name="dark_grey">#FF2F3334</color>
+    <color name="blue">#FF85C7BA</color>
+    <color name="yellow">#FFFCCD1C</color>
 </resources>

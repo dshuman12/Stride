@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -18,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hardsoftstudio.widget.AnchorSheetBehavior;
 import com.parse.ParseUser;
 
@@ -59,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
             //actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.logo_white));
         }
 
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
@@ -100,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     mName.setText("");
                     mAddress.setText("");
                     mRouteTime.setText("");
+                    mRouteTime.setBackgroundColor(getResources().getColor(R.color.dark_grey));
                 }
             }
 
@@ -121,6 +124,17 @@ public class MainActivity extends AppCompatActivity {
             mAddress.setText(dest.getString("formatted_address"));
             Integer walkScore = mMapManager.getWalkScore(mRouteTime);
             mRouteTime.setText(walkScore.toString());
+            if (walkScore > 80) {
+                Log.i(TAG, "walkscore" + walkScore);
+                mRouteTime.getBackground().setTint(getResources().getColor(R.color.blue));
+            }
+            else if (walkScore > 50) {
+                mRouteTime.getBackground().setTint(getResources().getColor(R.color.yellow));
+            }
+            else {
+                mRouteTime.getBackground().setTint(getResources().getColor(R.color.orange));
+            }
+
             if (mImage.getDrawable() == null) {
                 mMapManager.getPhoto(mImage);
             }
